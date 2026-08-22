@@ -1,0 +1,76 @@
+# =========================
+# Root ignores
+# =========================
+
+# Node modules (anywhere)
+node_modules/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Root env file (holds real API tokens/secrets — backend/src/bootstrap.ts
+# loads this, never commit it)
+.env
+.env.*
+!.env.example
+
+# =========================
+# Next.js app inside /fin
+# =========================
+
+# Build output
+fin/.next/
+fin/out/
+
+# Production build
+fin/build/
+
+# Env files
+fin/.env
+fin/.env.local
+fin/.env.development.local
+fin/.env.test.local
+fin/.env.production.local
+
+# Vercel
+fin/.vercel
+
+
+# TypeScript
+fin/*.tsbuildinfo
+fin/next-env.d.ts
+
+# Coverage
+fin/coverage/
+
+local.context
+
+# Cache
+fin/.cache/
+fin/*.cache
+
+# Turborepo (if used)
+fin/.turbo
+
+# ESLint
+fin/.eslintcache
+
+# Storybook
+fin/storybook-static/
+
+# =========================
+# Optional (uncomment if needed)
+# =========================
+
+# fin/package-lock.json
+# fin/yarn.lock
+# fin/pnpm-lock.yaml
