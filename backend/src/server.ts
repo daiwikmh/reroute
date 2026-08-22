@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { AGENTS_ZONE, CLOUDFLARE_CONFIGURED, PORT } from "./dns/config.js";
+import { AGENTS_ZONE, CLOUDFLARE_CONFIGURED, PORT, PUBLIC_BASE_URL } from "./dns/config.js";
 import { domainSlug } from "./dns/record.js";
 import { startSyncJob } from "./dns/sync.js";
 import { checkDnsStatus } from "./dns/status.js";
@@ -18,7 +18,13 @@ app.onError((err, c) => {
 });
 
 app.get("/health", (c) =>
-  c.json({ ok: true, cloudflareConfigured: CLOUDFLARE_CONFIGURED, agentsZone: AGENTS_ZONE }),
+  c.json({
+    ok: true,
+    cloudflareConfigured: CLOUDFLARE_CONFIGURED,
+    agentsZone: AGENTS_ZONE,
+    publicBaseUrl: PUBLIC_BASE_URL,
+    publicBaseUrlEnvSet: Boolean(process.env.PUBLIC_BASE_URL),
+  }),
 );
 
 app.get("/dns-record/:domain", (c) => {
