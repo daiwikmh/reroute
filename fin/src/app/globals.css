@@ -1,25 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #ec612c;
-  --color-accent: #ec612c;
-  --color-ink: #141110;
-  --color-ink-muted: #3a2318;
-  --color-surface: #141110;
-  --color-border: #241d1a;
-  --color-cream: #fdf6ee;
-  --color-cream-muted: #c9beb4;
+  --color-bg: #000000;
+  --color-accent: #afddff;
+  --color-ink: #ffffff;
+  --color-ink-muted: #9aa5ad;
+  --color-surface: #0a0d10;
+  --color-border: #242a30;
+  --color-cream: #ffffff;
+  --color-cream-muted: #9aa5ad;
   --color-teal: #12514c;
   --color-positive: #7bc96f;
   --color-negative: #e5484d;
 }
 
 :root[data-theme="light"] {
-  --color-bg: #fbf7f2;
+  --color-bg: #fbfcfe;
+  --color-ink: #10151a;
+  --color-ink-muted: #5a6672;
   --color-surface: #ffffff;
-  --color-border: #e5ddd1;
-  --color-cream: #141110;
-  --color-cream-muted: #6b5f56;
+  --color-border: #e3e8ee;
+  --color-cream: #10151a;
+  --color-cream-muted: #5a6672;
 }
 
 html {
@@ -66,4 +68,156 @@ body {
   display: flex;
   white-space: nowrap;
   animation: marquee-scroll 18s linear infinite;
+}
+
+/* Landing hero — deliberately black/ice-blue, decoupled from the
+   orange/light --color-* tokens the dashboard still uses. */
+
+.hero-display {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.hero-ui {
+  font-family: "Manrope", sans-serif;
+}
+
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hero-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes hero-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes hero-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-grid-v {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes hero-grid-h {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes hero-pulse-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.hero-anim-fade-up {
+  opacity: 0;
+  animation: hero-fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-anim-fade-in {
+  opacity: 0;
+  animation: hero-fade-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-anim-slide-left {
+  opacity: 0;
+  animation: hero-slide-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-anim-slide-right {
+  opacity: 0;
+  animation: hero-slide-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-anim-scale-in {
+  opacity: 0;
+  animation: hero-scale-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-anim-grid-v {
+  opacity: 0;
+  transform-origin: top;
+  animation: hero-grid-v 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-anim-grid-h {
+  opacity: 0;
+  transform-origin: left;
+  animation: hero-grid-h 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero-pulse-line {
+  stroke-dasharray: 4 10;
+  animation: hero-pulse-dash 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-anim-fade-up,
+  .hero-anim-fade-in,
+  .hero-anim-slide-left,
+  .hero-anim-slide-right,
+  .hero-anim-scale-in,
+  .hero-anim-grid-v,
+  .hero-anim-grid-h {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-pulse-line {
+    animation: none;
+  }
 }

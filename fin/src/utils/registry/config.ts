@@ -22,10 +22,16 @@ export type Currency = {
   name: string;
   address: string;
   decimals: number;
-  /** Reflector tracks this asset's price, so it can be an accepted asset for
-   * an endpoint priced in a different reference currency. Demo/local-only
-   * tokens are not tracked and can only be used as a sole reference currency
-   * unless the seller sets a manual price override. */
+  /** Whether Reflector can price this asset against another for automatic
+   * conversion. Confirmed false for everything here: Reflector's CEX/DEX
+   * aggregate feed only prices assets by symbol (Other("USDC")), never by
+   * Stellar contract address — a live lastprice({Stellar: <addr>}) call
+   * returns null for every asset below. The registry contract's get_price
+   * conversion path currently calls Reflector with Asset::Stellar(address),
+   * so it can never find a match — this needs a contract-level fix (map
+   * address -> Reflector symbol) before any "accepted asset" beyond the
+   * reference asset itself can actually settle. Until then, every endpoint
+   * effectively takes payment in its reference asset only. */
   reflectorTracked: boolean;
 };
 
@@ -33,16 +39,16 @@ export const CURRENCIES: Currency[] = [
   {
     code: "USDC",
     name: "USD Coin",
-    address: "CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU",
+    address: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
     decimals: 7,
-    reflectorTracked: true,
+    reflectorTracked: false,
   },
   {
     code: "XLM",
     name: "Stellar Lumens",
     address: "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
     decimals: 7,
-    reflectorTracked: true,
+    reflectorTracked: false,
   },
   {
     code: "cBRL",

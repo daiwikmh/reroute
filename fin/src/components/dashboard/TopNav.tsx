@@ -34,6 +34,17 @@ export default function TopNav({
 
         <nav className="hidden flex-1 items-center gap-1 md:flex">
           {NAV.map((item) => {
+            if (item === "Browse") {
+              return (
+                <Link
+                  key={item}
+                  href="/browse"
+                  className="micro px-3 py-2 text-[0.6875rem] uppercase text-cream-muted transition-colors hover:text-cream"
+                >
+                  {item}
+                </Link>
+              );
+            }
             const enabled = item === "Endpoints" || item === "Calls";
             return (
               <button

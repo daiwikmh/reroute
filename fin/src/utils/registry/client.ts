@@ -11,6 +11,7 @@ import {
   xdr,
 } from "endpoint_registry_sdk";
 import {
+  BACKEND_URL,
   CONTRACT_ERRORS,
   NETWORK_PASSPHRASE,
   REGISTRY_CONTRACT_ID,
@@ -106,6 +107,18 @@ export async function getEndpoint(domain: string): Promise<Endpoint | null> {
     // "not registered yet", the only outcome a caller needs to distinguish.
     return null;
   }
+}
+
+// The contract's own list_owner_domains only returns hashes (no reverse name
+// index on-chain) — the backend's DNS sync job already learns owner ->
+// domain from Register events, so it's the one place that can resolve
+// names for an address. Each name is then read straight from the contract
+// via getEndpoint, keeping the contract the source of truth for state.
+export async function listOwnerEndpoints(owner: string): Promise<Endpoint[]> {
+  const res = await fetch(`${BACKEND_URL}/endpoints/${encodeURIComponent(owner)}`);
+  const domains = (await res.json()) as string[];
+  const endpoints = await Promise.all(domains.map((domain) => getEndpoint(domain)));
+  return endpoints.filter((e): e is Endpoint => e !== null);
 }
 
 async function send(
