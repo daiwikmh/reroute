@@ -1,35 +1,17 @@
 # Reroute
 
-**The price lives in DNS, not behind a 402.**
-
-Register any HTTP endpoint you own, price it in whatever currency makes sense
-to you, and publish one DNS record. That record carries the price, currency,
-settlement asset, and pay-to address — an agent resolves all of it in a
-single DNS lookup and can construct a valid payment before it ever sends you
-an HTTP request. It then pays via the
-[x402](https://developers.stellar.org/docs/build/agentic-payments/x402)
-protocol — no API keys, no Stripe, no subscriptions.
-
-This replaces an earlier product (prize-linked savings) — see "History" below.
-
-## What makes this different from other x402-on-Stellar projects
-
-x402-on-Stellar itself is not a novel category — it's crowded. A Stellar
-ecosystem search (via the Stellar Scout MCP) turned up dozens of live,
-several SCF-funded, direct competitors doing "agent pays API via x402 on
-Stellar": **ApiCharge** (SCF Round 40, $79k), **REAPP** (SCF Round 43, $42k,
-which already combines x402 with AP2 mandate authorization), **TollPay** and
-**x402 MCP Stellar Template** (both hackathon-prize winners), **RouteDock**,
-**SpendGuard**, and ~20 more from a single April 2026 hackathon alone. Every
-one of them still does the standard flow: hit the endpoint, get a `402`,
-*learn the price from that response*, then pay.
-
-What none of them do — checked against the Stellar project directory, ~1,300
-indexed hackathon submissions, and the SEP/research corpus, with zero
-matches — is put the price itself in DNS. Reroute's `_agent.<domain>` TXT
-record carries `price`, `cur`, `asset`, and `payto` directly, so the entire
-payment can be constructed from one DNS lookup, with no HTTP round-trip
-needed just to find out what something costs. Verified live:
+**Reroute prices at the DNS layer.** x402 payments on Stellar are a crowded,
+funded category — **ApiCharge** (SCF Round 40, $79k), **REAPP** (SCF Round 43,
+combining x402 with AP2 mandate authorization), **TollPay**, **RouteDock**,
+**SpendGuard**, and ~20 more from a single April 2026 hackathon all do "agent
+pays API via x402 on Stellar" already. Every one of them still makes an agent
+send a request and get a `402` back before it learns the price. **Nobody
+found anywhere in Stellar's ecosystem index — not in project descriptions,
+not across ~1,300 indexed hackathon submissions, not in the code index —
+puts price, currency, settlement asset, and payee in the DNS record itself.**
+Reroute's `_agent.<domain>` TXT record does, so an agent resolves the entire
+payment in one DNS lookup, before it ever sends an HTTP request. Verified
+live:
 
 ```
 $ dig +short TXT 96bc5082e32eb01d.agents.neurus.xyz
@@ -38,7 +20,10 @@ price=300000;cur=USDC;asset=CBIE...QDAMA;payto=GDI6...SFCT7;
 facilitator=https://channels.openzeppelin.com/x402/testnet;active=true"
 ```
 
-That's the actual differentiator to lead with — not "we also do x402."
+Once the agent decides to pay, it does so through the standard
+[x402](https://developers.stellar.org/docs/build/agentic-payments/x402)
+protocol — no API keys, no Stripe, no subscriptions. DNS is the price sheet;
+x402 is still the payment rail.
 
 ## How it works
 
@@ -101,14 +86,7 @@ showing nothing was ever submitted for the blocked attempt).
 | `contracts/contracts/endpoint_registry/` | Soroban contract: registration, pricing, accepted assets. |
 | `contracts/packages/endpoint_registry_sdk/` | Generated TypeScript bindings. |
 | `backend/` | DNS sync job (registry events → Cloudflare), the x402-gated proxy, the call log. |
-| `BLEND_INTEGRATION_RESEARCH.md`, `YIELD_SOURCES.md`, `DREAMCASH_DESIGN.md`, `MULTICHAIN_ARCHITECTURE.md` | Research from the prior product. Superseded, kept for reference. |
-
-## History
-
-This repo previously implemented prize-linked USDC savings (deposit, pool
-yield via Blend Capital, weekly draw). That product's contract, backend, and
-dashboard screens have been removed; the reasoning behind the pivot and the
-research that preceded it live in the docs listed above.
+| `REROUTE_RESEARCH.md` | External research (protocols, standards, economics) behind Reroute's design decisions. |
 
 ## Develop
 

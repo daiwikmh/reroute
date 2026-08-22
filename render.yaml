@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: reroute-backend
+    runtime: node
+    rootDir: backend
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: AGENTS_ZONE
+        value: agents.neurus.xyz
+      - key: PUBLIC_BASE_URL
+        value: https://api.neurus.xyz
+      - key: X402_FACILITATOR_URL
+        value: https://channels.openzeppelin.com/x402/testnet
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: CLOUDFLARE_ZONE_ID
+        sync: false
+      - key: X402_FACILITATOR_API_KEY
+        sync: false

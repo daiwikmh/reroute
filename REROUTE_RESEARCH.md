@@ -12,9 +12,8 @@ draft, an official protocol doc, a named institutional report) via direct fetch 
 source allowed it. Where a source blocked automated fetching (Coinbase's blog and a couple
 of PDFs returned HTTP 403 or unparsable binary), the quote is instead reproduced from a
 search engine's cached summary of that exact page and is marked **(via secondary summary,
-not directly fetched)** — flagged the same way this repo already flags unverified claims
-in `BLEND_INTEGRATION_RESEARCH.md`. Nothing below is paraphrased into a fake quotation;
-anything in quotation marks is verbatim from the cited source.
+not directly fetched)**. Nothing below is paraphrased into a fake quotation; anything in
+quotation marks is verbatim from the cited source.
 
 ---
 
