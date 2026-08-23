@@ -90,6 +90,15 @@ export function useWallet() {
     }
   };
 
+  const signAuthEntry = async (authEntry: string, networkPassphrase: string) => {
+    const { address: walletAddress } = await StellarWalletsKit.getAddress();
+    const { signedAuthEntry } = await StellarWalletsKit.signAuthEntry(authEntry, {
+      networkPassphrase,
+      address: walletAddress,
+    });
+    return signedAuthEntry;
+  };
+
   const formatAddress = (addr: string) => {
     if (!addr) return '';
     return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
@@ -104,6 +113,7 @@ export function useWallet() {
     disconnectWallet,
     changeNetwork,
     signTransaction,
+    signAuthEntry,
     formatAddress,
   };
 }

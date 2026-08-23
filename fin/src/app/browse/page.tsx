@@ -109,7 +109,7 @@ export default function Browse() {
               <table className="w-full min-w-[36rem] border-collapse">
                 <thead>
                   <tr className="border-b border-border">
-                    {["Domain", "Price", "Asset", "Pay to"].map((h) => (
+                    {["Domain", "Price", "Asset", "Pay to", ""].map((h) => (
                       <th
                         key={h}
                         className="micro px-4 py-3 text-left text-[0.5625rem] uppercase font-normal text-cream-muted/60"
@@ -140,6 +140,14 @@ export default function Browse() {
                         </td>
                         <td className="px-4 py-3 text-sm text-cream-muted">{short(entry.asset)}</td>
                         <td className="px-4 py-3 text-sm text-cream-muted">{short(entry.payto)}</td>
+                        <td className="px-4 py-3 text-sm">
+                          <Link
+                            href={`/pay?domain=${encodeURIComponent(entry.domain)}`}
+                            className="micro border border-accent/60 px-3 py-1.5 text-[0.625rem] uppercase text-accent transition-colors hover:bg-accent hover:text-ink"
+                          >
+                            Pay
+                          </Link>
+                        </td>
                       </tr>
                     );
                   })}

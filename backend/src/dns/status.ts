@@ -1,6 +1,6 @@
-import { resolveTxt } from "node:dns/promises";
 import { AGENTS_ZONE } from "./config.js";
 import { domainSlug } from "./record.js";
+import { resolveTxtFlat } from "./doh.js";
 
 export type DnsStatus = {
   domain: string;
@@ -11,28 +11,15 @@ export type DnsStatus = {
 };
 
 // A TXT lookup at a CNAME name follows the chain per standard resolver
-// behaviour (RFC 1034 §3.6.2) — no manual CNAME-following needed here, the
-// resolver library does it.
+// behaviour (RFC 1034 §3.6.2) — the DoH resolver does this the same way a
+// classic resolver would.
 export async function checkDnsStatus(domain: string): Promise<DnsStatus> {
   const recordName = `_agent.${domain}`;
-  const expectedTarget = `${domainSlug(domain)}.${AGENTS_ZONE}`;
+  const expectedTarget = `${await domainSlug(domain)}.${AGENTS_ZONE}`;
   try {
-    const records = await resolveTxt(recordName);
-    const flat = records.map((chunks) => chunks.join(""));
+    const flat = await resolveTxtFlat(recordName);
     const aid = flat.find((r) => r.startsWith("v=aid1"));
     if (!aid) {
-      return {
-        domain,
-        recordName,
-        expectedTarget,
-        state: "pending",
-        detail: "A record was found, but it doesn't look like an AID record yet.",
-      };
-    }
-    return { domain, recordName, expectedTarget, state: "verified", detail: aid };
-  } catch (err) {
-    const code = (err as NodeJS.ErrnoException).code;
-    if (code === "ENOTFOUND" || code === "ENODATA") {
       return {
         domain,
         recordName,
@@ -41,6 +28,8 @@ export async function checkDnsStatus(domain: string): Promise<DnsStatus> {
         detail: "No record detected yet — add the CNAME shown above and wait a few minutes.",
       };
     }
+    return { domain, recordName, expectedTarget, state: "verified", detail: aid };
+  } catch (err) {
     return { domain, recordName, expectedTarget, state: "error", detail: String(err) };
   }
 }

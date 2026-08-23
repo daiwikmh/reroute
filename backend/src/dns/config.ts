@@ -26,10 +26,6 @@ export const CLOUDFLARE_CONFIGURED = Boolean(
   CLOUDFLARE_API_TOKEN && CLOUDFLARE_ZONE_ID,
 );
 
-export const CURSOR_FILE = new URL("../../data/dns-cursor.json", import.meta.url);
-export const SYNC_INTERVAL_MS = 30_000;
-export const PORT = Number(process.env.PORT ?? 8787);
-
 // Mirrors fin/src/utils/registry/config.ts's CURRENCIES — kept as a small,
 // separately-maintained list rather than a shared package, since both sides
 // are demo-scoped for now. Used only to render a human-readable `cur=` code

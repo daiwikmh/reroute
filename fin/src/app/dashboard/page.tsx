@@ -7,6 +7,7 @@ import EndpointsList from "@/components/dashboard/EndpointsList";
 import RegisterEndpointForm from "@/components/dashboard/RegisterEndpointForm";
 import DnsSetupPanel from "@/components/dashboard/DnsSetupPanel";
 import CallLog from "@/components/dashboard/CallLog";
+import Analytics from "@/components/dashboard/Analytics";
 import { listOwnerEndpoints } from "@/utils/registry/client";
 
 if (typeof window !== "undefined") {
@@ -65,11 +66,11 @@ export default function Dashboard() {
             {isConnected && address ? (
               <>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="micro text-[0.625rem] uppercase text-cream-muted">Endpoints</span>
+                  <h1 className="text-xl font-semibold tracking-tight text-ink">Endpoints</h1>
                   <button
                     type="button"
                     onClick={() => setShowRegisterForm((v) => !v)}
-                    className="micro border border-accent/60 px-4 py-2 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-ink"
+                    className="micro rounded-lg border border-accent/60 px-4 py-2 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-white"
                   >
                     {showRegisterForm ? "Close" : "Register new endpoint"}
                   </button>
@@ -98,9 +99,11 @@ export default function Dashboard() {
                     {registeredDomain ? (
                       <DnsSetupPanel domain={registeredDomain} />
                     ) : (
-                      <div className="flex h-full flex-col justify-center rounded-3xl border border-border bg-surface p-8">
-                        <span className="micro text-[0.625rem] uppercase text-cream-muted">DNS setup</span>
-                        <p className="mt-3 text-sm text-cream-muted">
+                      <div className="flex h-full flex-col justify-center rounded-2xl border border-border bg-surface p-8 shadow-sm">
+                        <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+                          DNS setup
+                        </span>
+                        <p className="mt-3 text-sm leading-relaxed text-cream-muted">
                           Register an endpoint and the exact DNS record to add shows up here, with live
                           verification once it&apos;s detected.
                         </p>
@@ -126,9 +129,13 @@ export default function Dashboard() {
           </div>
         )}
 
+        {nav === "Analytics" && <Analytics domains={ownedDomains} />}
+
         {nav === "Calls" && (
           <div>
-            <label htmlFor="callsDomain" className="micro block text-[0.5625rem] uppercase text-cream-muted/60">
+            <h1 className="text-xl font-semibold tracking-tight text-ink">Calls</h1>
+
+            <label htmlFor="callsDomain" className="micro mt-5 block text-[0.6875rem] font-medium uppercase tracking-wide text-cream-muted">
               Domain
             </label>
 
@@ -139,10 +146,10 @@ export default function Dashboard() {
                     key={domain}
                     type="button"
                     onClick={() => setCallsDomain(domain)}
-                    className={`micro border px-2.5 py-1 text-[0.625rem] ${
+                    className={`micro rounded-md border px-2.5 py-1.5 text-[0.6875rem] transition-colors ${
                       callsDomain === domain
-                        ? "border-accent/60 bg-accent/10 text-accent"
-                        : "border-border text-cream-muted hover:text-cream"
+                        ? "border-accent bg-accent-soft/40 text-accent"
+                        : "border-border text-cream-muted hover:border-cream-muted/60 hover:text-cream"
                     }`}
                   >
                     {domain}
@@ -156,7 +163,7 @@ export default function Dashboard() {
               value={callsDomain}
               onChange={(event) => setCallsDomain(event.target.value.trim().toLowerCase())}
               placeholder="api.yourcompany.com"
-              className="mt-2 w-full max-w-md border border-border bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-accent/60"
+              className="mt-2 w-full max-w-md rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent-soft/60"
             />
             <div className="mt-4">
               {callsDomain ? (

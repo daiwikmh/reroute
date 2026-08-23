@@ -57,11 +57,13 @@ export default function CallLog({ domain }: { domain: string }) {
   }, 0);
 
   return (
-    <div className="flex h-full flex-col rounded-3xl border border-border bg-surface p-6">
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
       <div className="flex items-center justify-between gap-3">
-        <span className="micro text-[0.625rem] uppercase text-cream-muted">Verified access log</span>
+        <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+          Verified access log
+        </span>
         {calls && calls.length > 0 && (
-          <span className="micro text-[0.625rem] uppercase text-accent">
+          <span className="micro rounded-full bg-accent-soft/40 px-2.5 py-1 text-[0.625rem] uppercase text-accent">
             {calls.length} verified request{calls.length === 1 ? "" : "s"}
             {total !== undefined && total > 0 && ` · ${total.toFixed(2)} collected`}
           </span>
@@ -75,7 +77,7 @@ export default function CallLog({ domain }: { domain: string }) {
       )}
 
       {!error && calls && calls.length === 0 && (
-        <p className="mt-4 text-[0.8125rem] text-cream-muted">
+        <p className="mt-4 text-[0.8125rem] leading-relaxed text-cream-muted">
           No verified requests yet. Every agent that clears payment — even a $0
           verify-only endpoint — signs a real transaction and shows up here, whether
           or not you're charging for access.
@@ -83,14 +85,14 @@ export default function CallLog({ domain }: { domain: string }) {
       )}
 
       {calls && calls.length > 0 && (
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-4 overflow-x-auto rounded-xl border border-border">
           <table className="w-full min-w-[28rem] border-collapse">
             <thead>
-              <tr className="border-b border-border">
+              <tr className="border-b border-border bg-bg">
                 {["Payer", "Amount", "When", "Tx"].map((h) => (
                   <th
                     key={h}
-                    className="micro px-2 py-2 text-left text-[0.5625rem] uppercase font-normal text-cream-muted/60"
+                    className="micro px-3 py-2.5 text-left text-[0.625rem] font-medium uppercase tracking-wide text-cream-muted"
                   >
                     {h}
                   </th>
@@ -101,16 +103,16 @@ export default function CallLog({ domain }: { domain: string }) {
               {calls.map((call) => {
                 const currency = currencyFor(call.asset);
                 return (
-                  <tr key={`${call.txHash}-${call.at}`} className="border-b border-border/50 last:border-0">
-                    <td className="px-2 py-2.5 text-sm text-cream">{short(call.payer)}</td>
-                    <td className="px-2 py-2.5 text-sm text-cream">
+                  <tr key={`${call.txHash}-${call.at}`} className="border-b border-border last:border-0">
+                    <td className="px-3 py-2.5 text-sm text-cream">{short(call.payer)}</td>
+                    <td className="px-3 py-2.5 text-sm text-cream">
                       {currency ? formatUnits(BigInt(call.amount), currency.decimals) : call.amount}{" "}
                       {currency?.code ?? ""}
                     </td>
-                    <td className="px-2 py-2.5 text-sm text-cream-muted">
+                    <td className="px-3 py-2.5 text-sm text-cream-muted">
                       {new Date(call.at * 1000).toLocaleTimeString()}
                     </td>
-                    <td className="px-2 py-2.5 text-sm text-cream-muted">
+                    <td className="px-3 py-2.5 text-sm text-cream-muted">
                       {call.txHash ? (
                         <a
                           href={`https://stellar.expert/explorer/testnet/tx/${call.txHash}`}

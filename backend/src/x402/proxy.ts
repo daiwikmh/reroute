@@ -1,7 +1,8 @@
 import type { Context } from "hono";
 import { Transaction, scValToNative } from "@stellar/stellar-sdk";
 import type { PaymentPayload } from "@x402/core/types";
-import { appendCall } from "../calls.js";
+import { appendCall } from "../store.js";
+import type { Bindings } from "../env.js";
 import { getEndpointByDomain, isPayerAllowed } from "../dns/registry.js";
 import { NETWORK_PASSPHRASE } from "../dns/config.js";
 import { checkDnsStatus } from "../dns/status.js";
@@ -86,7 +87,7 @@ async function fetchOrigin(domain: string): Promise<{ status: number; body: stri
   }
 }
 
-export async function handlePay(c: Context) {
+export async function handlePay(c: Context<{ Bindings: Bindings }>) {
   const domain = (c.req.param("domain") ?? "").trim().toLowerCase();
   const endpoint = await getEndpointByDomain(domain);
   if (!endpoint || !endpoint.active) {
@@ -157,7 +158,7 @@ export async function handlePay(c: Context) {
     Object.entries(settlement.headers).forEach(([k, v]) => c.header(k, v));
     // Payment already cleared regardless of what the origin returned — that's
     // the payer's proof of a genuine attempt, not a reason to skip the log.
-    await appendCall({
+    await appendCall(c.env.DNS_KV, {
       domain,
       payer: settlement.payer ?? "unknown",
       asset: process.paymentRequirements.asset,

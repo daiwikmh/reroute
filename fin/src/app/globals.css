@@ -1,27 +1,21 @@
 @import "tailwindcss";
 
+/* Dashboard is light-only, deliberately — no dark variant, no data-theme
+   switching. The landing page's black/ice-blue hero is a separate, hardcoded
+   design (Intro.tsx) and doesn't read these tokens at all. */
 @theme {
-  --color-bg: #000000;
-  --color-accent: #afddff;
-  --color-ink: #ffffff;
-  --color-ink-muted: #9aa5ad;
-  --color-surface: #0a0d10;
-  --color-border: #242a30;
-  --color-cream: #ffffff;
-  --color-cream-muted: #9aa5ad;
-  --color-teal: #12514c;
-  --color-positive: #7bc96f;
-  --color-negative: #e5484d;
-}
-
-:root[data-theme="light"] {
-  --color-bg: #fbfcfe;
+  --color-bg: #f6f8fb;
+  --color-accent: #1f6fb2;
+  --color-accent-soft: #afddff;
   --color-ink: #10151a;
   --color-ink-muted: #5a6672;
   --color-surface: #ffffff;
   --color-border: #e3e8ee;
   --color-cream: #10151a;
   --color-cream-muted: #5a6672;
+  --color-teal: #12514c;
+  --color-positive: #1c8a4b;
+  --color-negative: #d0342c;
 }
 
 html {

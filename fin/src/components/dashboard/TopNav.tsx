@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import ThemeToggle from "@/components/ThemeToggle";
 
-const NAV = ["Endpoints", "DNS Setup", "Calls", "Browse"];
+const NAV = ["Endpoints", "DNS Setup", "Calls", "Analytics", "Browse"];
 
 type Props = {
   active: string;
@@ -28,8 +27,7 @@ export default function TopNav({
     <header className="sticky top-0 z-20 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[100rem] items-center gap-6 px-6 py-4 md:px-10">
         <Link href="/" className="shrink-0 leading-none text-cream">
-          <span className="text-2xl">Reroute</span>
-          <sup className="ml-0.5 text-[0.6rem] text-cream-muted">(R)</sup>
+          <span className="text-2xl font-semibold tracking-tight">Reroute</span>
         </Link>
 
         <nav className="hidden flex-1 items-center gap-1 md:flex">
@@ -39,24 +37,24 @@ export default function TopNav({
                 <Link
                   key={item}
                   href="/browse"
-                  className="micro px-3 py-2 text-[0.6875rem] uppercase text-cream-muted transition-colors hover:text-cream"
+                  className="micro rounded-md px-3 py-2 text-[0.6875rem] uppercase text-cream-muted transition-colors hover:bg-black/[0.03] hover:text-cream"
                 >
                   {item}
                 </Link>
               );
             }
-            const enabled = item === "Endpoints" || item === "Calls";
+            const enabled = item === "Endpoints" || item === "Calls" || item === "Analytics";
             return (
               <button
                 key={item}
                 onClick={() => enabled && onSelect(item)}
                 disabled={!enabled}
                 title={enabled ? undefined : "Not available yet"}
-                className={`micro px-3 py-2 text-[0.6875rem] uppercase transition-colors ${
+                className={`micro rounded-md px-3 py-2 text-[0.6875rem] uppercase transition-colors ${
                   active === item
-                    ? "text-accent"
+                    ? "bg-accent-soft/40 text-accent"
                     : enabled
-                      ? "text-cream-muted hover:text-cream"
+                      ? "text-cream-muted hover:bg-black/[0.03] hover:text-cream"
                       : "cursor-not-allowed text-cream-muted/40"
                 }`}
               >
@@ -67,15 +65,14 @@ export default function TopNav({
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="micro hidden items-center gap-1.5 text-[0.625rem] uppercase text-cream-muted sm:flex">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+          <span className="micro hidden items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[0.625rem] uppercase text-cream-muted sm:flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-positive" />
             {network}
           </span>
-          <ThemeToggle className="text-cream-muted hover:text-cream" />
           <button
             onClick={onConnect}
             disabled={isConnecting}
-            className="micro shrink-0 border border-accent/60 px-4 py-2.5 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-ink disabled:opacity-50"
+            className="micro shrink-0 rounded-md bg-accent px-4 py-2.5 text-xs uppercase text-white shadow-sm transition-colors hover:bg-accent/90 disabled:opacity-50"
           >
             {isConnecting ? "Connecting" : isConnected ? label : "Connect wallet"}
           </button>

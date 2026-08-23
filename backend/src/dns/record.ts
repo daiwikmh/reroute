@@ -1,12 +1,17 @@
-import { createHash } from "node:crypto";
 import { CURRENCY_CODES, PUBLIC_BASE_URL } from "./config.js";
 import type { Endpoint } from "./registry.js";
 
 // Matches fin/src/utils/registry/client.ts's domainSlug exactly — both sides
 // must derive the same short id from the same normalised (lower-cased)
 // domain for the CNAME target and the Cloudflare record name to line up.
-export function domainSlug(domain: string): string {
-  return createHash("sha256").update(domain.trim().toLowerCase()).digest("hex").slice(0, 16);
+// Web Crypto (not node:crypto) so this runs unchanged on Workers.
+export async function domainSlug(domain: string): Promise<string> {
+  const bytes = new TextEncoder().encode(domain.trim().toLowerCase());
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .slice(0, 8)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 // AID-style key=value TXT content. A single TXT character-string caps at 255

@@ -1,19 +1,23 @@
-import { AGENTS_ZONE, CLOUDFLARE_CONFIGURED, SYNC_INTERVAL_MS } from "./config.js";
-import { getState, putState } from "./cache.js";
+import { AGENTS_ZONE, CLOUDFLARE_CONFIGURED } from "./config.js";
+import { getState, putState } from "../store.js";
 import { deleteTxtRecord, upsertTxtRecord } from "./cloudflare.js";
 import { latestLedger, readRegistryChanges } from "./events.js";
 import { buildTxtRecord, domainSlug } from "./record.js";
 import { getEndpointByDomain } from "./registry.js";
 
-async function syncOnce(): Promise<void> {
-  const state = await getState();
+// Runs once per Cron Trigger invocation instead of a setInterval loop — a
+// scheduled Worker invocation is inherently one-at-a-time, so the old
+// re-entrancy guard (the `running` flag in the previous setInterval version)
+// isn't needed here.
+export async function syncOnce(kv: KVNamespace): Promise<void> {
+  const state = await getState(kv);
   // A fresh cache has no cursor at all — RPC only retains recent history, so
-  // "from ledger 1" would fail. Nothing on-chain before this process's first
+  // "from ledger 1" would fail. Nothing on-chain before this run's first
   // tick matters anyway (registrations before that would need a one-off
   // backfill run, not steady-state sync).
   if (state.lastLedger === 0) {
     state.lastLedger = (await latestLedger()) - 1;
-    await putState(state);
+    await putState(kv, state);
   }
   const changes = await readRegistryChanges(state.lastLedger + 1);
   if (changes.length === 0) return;
@@ -37,7 +41,7 @@ async function syncOnce(): Promise<void> {
     }
 
     const endpoint = await getEndpointByDomain(domain);
-    const recordName = `${domainSlug(domain)}.${AGENTS_ZONE}`;
+    const recordName = `${await domainSlug(domain)}.${AGENTS_ZONE}`;
 
     if (!CLOUDFLARE_CONFIGURED) {
       console.log(
@@ -56,26 +60,5 @@ async function syncOnce(): Promise<void> {
   }
 
   state.lastLedger = Math.max(state.lastLedger, ...changes.map((c) => c.ledger));
-  await putState(state);
-}
-
-export function startSyncJob(): void {
-  let running = false;
-  const tick = async () => {
-    // A slow tick (Cloudflare hiccup, a burst of registrations) must not run
-    // concurrently with the next timer fire — two overlapping ticks racing
-    // on the same cursor file would corrupt it the same way calls.json could
-    // without its own write queue.
-    if (running) return;
-    running = true;
-    try {
-      await syncOnce();
-    } catch (err) {
-      console.error("dns-sync failed:", err);
-    } finally {
-      running = false;
-    }
-  };
-  tick();
-  setInterval(tick, SYNC_INTERVAL_MS);
+  await putState(kv, state);
 }

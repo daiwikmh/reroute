@@ -22,6 +22,20 @@ type Props = {
 
 const DEFAULT_FACILITATOR = "https://channels.openzeppelin.com/x402/testnet";
 
+function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="micro block text-[0.6875rem] font-medium uppercase tracking-wide text-cream-muted">
+        {label}
+      </label>
+      <div className="mt-1.5">{children}</div>
+    </div>
+  );
+}
+
+const inputClass =
+  "w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent-soft/60";
+
 export default function RegisterEndpointForm({
   address,
   isConnected,
@@ -94,18 +108,18 @@ export default function RegisterEndpointForm({
 
   if (!isConnected) {
     return (
-      <div className="flex h-full flex-col justify-center rounded-3xl border border-border bg-surface p-8">
-        <h2 className="text-2xl leading-snug text-cream">
+      <div className="flex h-full flex-col justify-center rounded-2xl border border-border bg-surface p-8 shadow-sm">
+        <h2 className="text-2xl font-semibold leading-snug tracking-tight text-cream">
           Connect your wallet to register a paid endpoint
         </h2>
-        <p className="mt-3 text-sm text-cream-muted">
+        <p className="mt-3 text-sm leading-relaxed text-cream-muted">
           Any HTTP endpoint you own can start charging AI agents per call — no API
           keys, no Stripe, no subscriptions.
         </p>
         <button
           onClick={onConnect}
           disabled={isConnecting}
-          className="micro mt-6 self-start border border-accent/60 px-5 py-3 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-ink disabled:opacity-50"
+          className="micro mt-6 self-start rounded-lg bg-accent px-5 py-3 text-xs uppercase text-white shadow-sm transition-colors hover:bg-accent/90 disabled:opacity-50"
         >
           {isConnecting ? "Connecting" : "Connect wallet"}
         </button>
@@ -114,41 +128,39 @@ export default function RegisterEndpointForm({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-3xl border border-border bg-surface p-6">
-      <span className="micro text-[0.625rem] uppercase text-cream-muted">
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
         Register an endpoint
       </span>
 
-      <label htmlFor="domain" className="micro mt-5 block text-[0.5625rem] uppercase text-cream-muted/60">
-        Domain
-      </label>
-      <input
-        id="domain"
-        value={domain}
-        onChange={(event) => setDomain(event.target.value)}
-        placeholder="api.yourcompany.com"
-        className="mt-2 w-full border border-border bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-accent/60"
-      />
+      <div className="mt-5">
+        <Field label="Domain" htmlFor="domain">
+          <input
+            id="domain"
+            value={domain}
+            onChange={(event) => setDomain(event.target.value)}
+            placeholder="api.yourcompany.com"
+            className={inputClass}
+          />
+        </Field>
+      </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="price" className="micro block text-[0.5625rem] uppercase text-cream-muted/60">
-            Price per call
-          </label>
+        <Field label="Price per call" htmlFor="price">
           <input
             id="price"
             value={price}
             onChange={(event) => setPrice(event.target.value)}
             inputMode="decimal"
             placeholder="0.05"
-            className="mt-2 w-full border border-border bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-accent/60"
+            className={inputClass}
           />
-        </div>
+        </Field>
         <div>
-          <span className="micro block text-[0.5625rem] uppercase text-cream-muted/60">
+          <span className="micro block text-[0.6875rem] font-medium uppercase tracking-wide text-cream-muted">
             Currency
           </span>
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {CURRENCIES.map((c) => (
               <button
                 key={c.code}
@@ -162,10 +174,10 @@ export default function RegisterEndpointForm({
                   });
                 }}
                 title={c.name}
-                className={`micro border px-2.5 py-1 text-[0.625rem] uppercase ${
+                className={`micro rounded-md border px-2.5 py-1.5 text-[0.6875rem] uppercase transition-colors ${
                   currency.code === c.code
-                    ? "border-accent/60 bg-accent/10 text-accent"
-                    : "border-border text-cream-muted hover:text-cream"
+                    ? "border-accent bg-accent-soft/40 text-accent"
+                    : "border-border text-cream-muted hover:border-cream-muted/60 hover:text-cream"
                 }`}
               >
                 {c.code}
@@ -176,7 +188,7 @@ export default function RegisterEndpointForm({
       </div>
 
       {!currency.reflectorTracked && (
-        <p className="mt-3 text-[0.6875rem] text-cream-muted">
+        <p className="mt-3 text-[0.75rem] leading-relaxed text-cream-muted">
           {currency.name} has no live price feed, so this endpoint can only be paid in{" "}
           {currency.code} — accepting other currencies needs a manual rate, set after
           registering.
@@ -185,19 +197,19 @@ export default function RegisterEndpointForm({
 
       {currency.reflectorTracked && acceptable.length > 0 && (
         <div className="mt-4">
-          <span className="micro block text-[0.5625rem] uppercase text-cream-muted/60">
+          <span className="micro block text-[0.6875rem] font-medium uppercase tracking-wide text-cream-muted">
             Also accept (converted automatically at call time)
           </span>
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {acceptable.map((c) => (
               <button
                 key={c.code}
                 type="button"
                 onClick={() => toggleAccepted(c.code)}
-                className={`micro border px-2.5 py-1 text-[0.625rem] uppercase ${
+                className={`micro rounded-md border px-2.5 py-1.5 text-[0.6875rem] uppercase transition-colors ${
                   accepted.has(c.code)
-                    ? "border-accent/60 bg-accent/10 text-accent"
-                    : "border-border text-cream-muted hover:text-cream"
+                    ? "border-accent bg-accent-soft/40 text-accent"
+                    : "border-border text-cream-muted hover:border-cream-muted/60 hover:text-cream"
                 }`}
               >
                 {c.code}
@@ -208,27 +220,26 @@ export default function RegisterEndpointForm({
       )}
 
       <div className="mt-4">
-        <label htmlFor="facilitator" className="micro block text-[0.5625rem] uppercase text-cream-muted/60">
-          Facilitator URL
-        </label>
-        <input
-          id="facilitator"
-          value={facilitatorUrl}
-          onChange={(event) => setFacilitatorUrl(event.target.value)}
-          className="mt-2 w-full border border-border bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-accent/60"
-        />
+        <Field label="Facilitator URL" htmlFor="facilitator">
+          <input
+            id="facilitator"
+            value={facilitatorUrl}
+            onChange={(event) => setFacilitatorUrl(event.target.value)}
+            className={inputClass}
+          />
+        </Field>
       </div>
 
       <button
         onClick={submit}
         disabled={pending || !domain.trim() || !price.trim()}
-        className="micro mt-5 border border-accent/60 px-4 py-2.5 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+        className="micro mt-5 rounded-lg bg-accent px-4 py-2.5 text-xs uppercase text-white shadow-sm transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {pending ? "Registering…" : "Register endpoint"}
       </button>
 
       {price && !Number.isNaN(Number(price)) && (
-        <p className="mt-3 text-[0.6875rem] text-cream-muted">
+        <p className="mt-3 text-[0.75rem] text-cream-muted">
           Agents will pay {price} {currency.code}
           {" "}({formatUnits(toSafeUnits(price, currency.decimals), currency.decimals)}{" "}
           base units) per call.
@@ -237,7 +248,7 @@ export default function RegisterEndpointForm({
 
       {problem && (
         <p
-          className={`mt-3 text-[0.6875rem] ${
+          className={`mt-3 text-[0.75rem] ${
             problem.severity === "failure" ? "text-negative" : "text-cream-muted"
           }`}
         >

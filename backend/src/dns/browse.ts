@@ -1,6 +1,6 @@
-import { resolveTxt } from "node:dns/promises";
-import { getState } from "./cache.js";
+import { getState } from "../store.js";
 import { parseTxtRecord } from "./record.js";
+import { resolveTxtFlat } from "./doh.js";
 
 export type BrowseEntry = {
   domain: string;
@@ -15,15 +15,14 @@ export type BrowseEntry = {
 // came from a DNS TXT lookup, not from hitting each seller's server. Domains
 // are resolved in parallel for the same reason an agent would — comparing
 // many candidates by price never needs to touch their origins.
-export async function listActiveEndpoints(): Promise<BrowseEntry[]> {
-  const state = await getState();
+export async function listActiveEndpoints(kv: KVNamespace): Promise<BrowseEntry[]> {
+  const state = await getState(kv);
   const domains = Object.values(state.domains);
 
   const results = await Promise.all(
     domains.map(async (domain): Promise<BrowseEntry | null> => {
       try {
-        const records = await resolveTxt(`_agent.${domain}`);
-        const flat = records.map((chunks) => chunks.join(""));
+        const flat = await resolveTxtFlat(`_agent.${domain}`);
         const raw = flat.find((r) => r.startsWith("v=aid1"));
         if (!raw) return null;
 

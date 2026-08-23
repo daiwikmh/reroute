@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/utils/theme";
 
 export const metadata: Metadata = {
   title: "Reroute",
   description: "Charge AI agents per call, on Stellar.",
 };
-
-const THEME_INIT_SCRIPT = `
-try {
-  var t = localStorage.getItem('reroute-theme');
-  if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
-} catch (e) {}
-`;
 
 export default function RootLayout({
   children,
@@ -30,11 +22,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500&display=swap"
           rel="stylesheet"
         />
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

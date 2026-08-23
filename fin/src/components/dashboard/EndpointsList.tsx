@@ -54,8 +54,10 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
   };
 
   return (
-    <div className="flex h-full flex-col rounded-3xl border border-border bg-surface p-6">
-      <span className="micro text-[0.625rem] uppercase text-cream-muted">Your endpoints</span>
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
+      <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+        Your endpoints
+      </span>
 
       {error && <p className="mt-4 text-[0.75rem] text-negative">{error}</p>}
 
@@ -68,16 +70,19 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
       )}
 
       {endpoints && endpoints.length > 0 && (
-        <div className="mt-4 flex flex-col divide-y divide-border">
+        <div className="mt-4 flex flex-col gap-2">
           {endpoints.map((endpoint) => {
             const currency = currencyFor(endpoint.referenceAsset);
             return (
-              <div key={endpoint.domain} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+              <div
+                key={endpoint.domain}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-3"
+              >
                 <div className="min-w-0">
                   <button
                     type="button"
                     onClick={() => onSelectDomain(endpoint.domain)}
-                    className="truncate text-sm text-cream hover:text-accent hover:underline"
+                    className="truncate text-sm font-medium text-cream hover:text-accent hover:underline"
                   >
                     {endpoint.domain}
                   </button>
@@ -89,7 +94,7 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
 
                 <div className="flex shrink-0 items-center gap-2">
                   <span
-                    className={`micro flex items-center gap-1.5 text-[0.625rem] uppercase ${
+                    className={`micro flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1 text-[0.625rem] uppercase ${
                       endpoint.active ? "text-positive" : "text-cream-muted/60"
                     }`}
                   >
@@ -100,7 +105,7 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
                     type="button"
                     onClick={() => toggle(endpoint)}
                     disabled={busyDomain === endpoint.domain}
-                    className="micro shrink-0 border border-border px-3 py-1.5 text-[0.625rem] uppercase text-cream-muted transition-colors hover:border-accent/60 hover:text-accent disabled:opacity-50"
+                    className="micro shrink-0 rounded-lg border border-border bg-white px-3 py-1.5 text-[0.625rem] uppercase text-cream-muted transition-colors hover:border-accent/60 hover:text-accent disabled:opacity-50"
                   >
                     {busyDomain === endpoint.domain ? "…" : endpoint.active ? "Pause" : "Resume"}
                   </button>
