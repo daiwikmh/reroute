@@ -14,7 +14,7 @@
     "@stellar/stellar-sdk": "^16.0.1",
     "@x402/core": "^2.23.0",
     "@x402/stellar": "^2.23.0",
-    "endpoint_registry_sdk": "file:../contracts/packages/endpoint_registry_sdk",
+    "buffer": "6.0.3",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -9,7 +9,7 @@ import {
   BASE_FEE,
   scValToNative,
   xdr,
-} from "endpoint_registry_sdk";
+} from "./bindings";
 import {
   BACKEND_URL,
   CONTRACT_ERRORS,
