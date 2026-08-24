@@ -21,6 +21,6 @@
   "vars": {
     "AGENTS_ZONE": "agents.neurus.xyz",
     "PUBLIC_BASE_URL": "https://api.neurus.xyz",
-    "X402_FACILITATOR_URL": "https://channels.openzeppelin.com/x402/testnet"
+    "X402_FACILITATOR_URL": "https://channels.openzeppelin.com/x402"
   }
 }
