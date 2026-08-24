@@ -99,7 +99,7 @@ export default function Footer() {
             </div>
 
             <p className="hero-ui text-white/35 text-[12px] leading-[18px]">
-              Reroute is experimental software running on Stellar testnet. Payments settle through
+              Reroute is experimental software running on Stellar mainnet with real funds. Payments settle through
               Stellar&apos;s hosted x402 facilitator, not a facilitator Reroute operates itself.
               Pricing, availability, and supported assets may change without notice.
             </p>

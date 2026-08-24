@@ -5,7 +5,7 @@ import { z } from "zod";
 import { resolveAid } from "./aid.js";
 import { payAndCall } from "./pay.js";
 
-const NETWORK = process.env.STELLAR_NETWORK ?? "stellar:testnet";
+const NETWORK = process.env.STELLAR_NETWORK ?? "stellar:pubnet";
 const DIRECTORY_URL = process.env.REROUTE_BACKEND_URL ?? "https://api.neurus.xyz";
 
 const server = new McpServer({ name: "reroute", version: "0.1.0" });

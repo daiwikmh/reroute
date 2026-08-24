@@ -3,7 +3,7 @@ import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import type { ClientStellarSigner } from "@x402/stellar";
 import { NETWORK_PASSPHRASE } from "@/utils/registry/config";
 
-const STELLAR_TESTNET_NETWORK = "stellar:testnet";
+const STELLAR_NETWORK = "stellar:pubnet";
 
 export type AuthEntrySigner = (authEntry: string, networkPassphrase: string) => Promise<string>;
 
@@ -55,7 +55,7 @@ export async function payAndCall(
   };
 
   const client = new x402Client();
-  client.register(STELLAR_TESTNET_NETWORK, new ExactStellarScheme(signer));
+  client.register(STELLAR_NETWORK, new ExactStellarScheme(signer));
   // The library's default spend-control guard only auto-approves a
   // per-network "default" asset (USDC) — Reroute endpoints can be priced in
   // anything, so this app has to make that trust decision itself instead of

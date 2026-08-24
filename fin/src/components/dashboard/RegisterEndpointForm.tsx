@@ -22,7 +22,7 @@ type Props = {
   onRegistered: (domain: string) => void;
 };
 
-const DEFAULT_FACILITATOR = "https://channels.openzeppelin.com/x402/testnet";
+const DEFAULT_FACILITATOR = "https://channels.openzeppelin.com/x402";
 
 function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (

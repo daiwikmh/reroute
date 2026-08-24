@@ -3,7 +3,7 @@ import { x402HTTPResourceServer } from "@x402/core/http";
 import { ExactStellarScheme } from "@x402/stellar/exact/server";
 import { facilitatorClient } from "./facilitator.js";
 
-const NETWORK = "stellar:testnet";
+const NETWORK = (process.env.X402_NETWORK ?? "stellar:pubnet") as `${string}:${string}`;
 
 const server = new x402ResourceServer(facilitatorClient).register(
   NETWORK,

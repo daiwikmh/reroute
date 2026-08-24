@@ -139,7 +139,7 @@ export default function CallLog({ domain }: { domain: string }) {
                     <td className="px-3 py-2.5 text-sm text-cream-muted">
                       {call.txHash ? (
                         <a
-                          href={`https://stellar.expert/explorer/testnet/tx/${call.txHash}`}
+                          href={`https://stellar.expert/explorer/public/tx/${call.txHash}`}
                           target="_blank"
                           rel="noreferrer"
                           className="text-accent hover:underline"
