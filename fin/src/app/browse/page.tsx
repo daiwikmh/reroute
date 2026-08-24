@@ -14,6 +14,8 @@ type BrowseEntry = {
   uri: string;
 };
 
+type ResolvedDomain = BrowseEntry & { active: boolean; facilitator: string };
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8787";
 const POLL_MS = 15000;
 
@@ -29,6 +31,32 @@ function short(address: string) {
 export default function Browse() {
   const [entries, setEntries] = useState<BrowseEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [lookup, setLookup] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [lookupResult, setLookupResult] = useState<ResolvedDomain | null>(null);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+
+  const runLookup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const domain = lookup.trim().toLowerCase();
+    if (!domain) return;
+    setLookupLoading(true);
+    setLookupResult(null);
+    setLookupError(null);
+    try {
+      const res = await fetch(`${BACKEND_URL}/resolve/${encodeURIComponent(domain)}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setLookupError(body?.error ?? "No AID record found at that domain.");
+        return;
+      }
+      setLookupResult((await res.json()) as ResolvedDomain);
+    } catch {
+      setLookupError("Could not reach the DNS resolver.");
+    } finally {
+      setLookupLoading(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -87,6 +115,61 @@ export default function Browse() {
           requests sent to any of these servers. This is what an agent sees before it decides
           which one to call.
         </p>
+
+        <form onSubmit={runLookup} className="mt-6 flex max-w-xl gap-2">
+          <input
+            value={lookup}
+            onChange={(e) => setLookup(e.target.value)}
+            placeholder="Look up any domain, e.g. api.example.com"
+            className="min-w-0 flex-1 border border-border bg-surface px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-accent"
+          />
+          <button
+            type="submit"
+            disabled={lookupLoading}
+            className="micro shrink-0 border border-accent/60 px-4 py-2.5 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-black disabled:opacity-50"
+          >
+            {lookupLoading ? "Resolving…" : "Resolve"}
+          </button>
+        </form>
+
+        {lookupError && <p className="mt-3 text-sm text-negative">{lookupError}</p>}
+
+        {lookupResult && (
+          <div className="mt-3 max-w-xl border border-border bg-surface p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-medium text-cream">{lookupResult.domain}</span>
+              <span
+                className={`micro border border-border px-2 py-0.5 text-[0.625rem] uppercase ${
+                  lookupResult.active ? "text-positive" : "text-cream-muted/60"
+                }`}
+              >
+                {lookupResult.active ? "Active" : "Inactive"}
+              </span>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[0.8125rem] text-cream-muted sm:grid-cols-4">
+              <div>
+                <div className="micro text-[0.625rem] uppercase text-cream-muted/60">Price</div>
+                {lookupResult.price} {lookupResult.cur}
+              </div>
+              <div>
+                <div className="micro text-[0.625rem] uppercase text-cream-muted/60">Pay to</div>
+                {short(lookupResult.payto)}
+              </div>
+              <div>
+                <div className="micro text-[0.625rem] uppercase text-cream-muted/60">Asset</div>
+                {short(lookupResult.asset)}
+              </div>
+              <div>
+                <div className="micro text-[0.625rem] uppercase text-cream-muted/60">Facilitator</div>
+                {lookupResult.facilitator || "—"}
+              </div>
+            </div>
+            <p className="mt-3 text-[0.75rem] text-cream-muted/70">
+              Resolved from one DNS TXT lookup at _agent.{lookupResult.domain} — zero requests sent to the domain
+              itself.
+            </p>
+          </div>
+        )}
 
         {error && <p className="mt-6 text-sm text-negative">{error}</p>}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useWallet } from "@/utils/wallet/hooks";
 
@@ -161,12 +162,14 @@ export default function Intro() {
 
       <nav className="absolute top-0 left-0 w-full z-20 flex items-center justify-between px-[3vw] md:px-[6vw] py-5 md:py-6">
         <div className="flex items-center gap-8 md:gap-10">
-          <Link
-            href="/"
-            className="hero-display text-white select-none"
-            style={{ fontSize: "clamp(1.25rem, 2.4vw, 1.6rem)" }}
-          >
-            REROUTE
+          <Link href="/" className="flex items-center gap-2.5 select-none">
+            <Image src="/mark.png" alt="" width={28} height={28} className="h-[1.15em] w-[1.15em]" priority />
+            <span
+              className="hero-display text-white"
+              style={{ fontSize: "clamp(1.25rem, 2.4vw, 1.6rem)" }}
+            >
+              REROUTE
+            </span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-10">

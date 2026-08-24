@@ -54,8 +54,8 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
   };
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
-      <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+    <div className="flex h-full flex-col border-t border-border bg-surface p-6">
+      <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-accent">
         Your endpoints
       </span>
 
@@ -76,7 +76,7 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
             return (
               <div
                 key={endpoint.domain}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-bg px-4 py-3"
+                className="flex items-center justify-between gap-3 border border-border bg-bg px-4 py-3"
               >
                 <div className="min-w-0">
                   <button
@@ -94,7 +94,7 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
 
                 <div className="flex shrink-0 items-center gap-2">
                   <span
-                    className={`micro flex items-center gap-1.5 rounded-full border border-border bg-white px-2.5 py-1 text-[0.625rem] uppercase ${
+                    className={`micro flex items-center gap-1.5 border border-border px-2.5 py-1 text-[0.625rem] uppercase ${
                       endpoint.active ? "text-positive" : "text-cream-muted/60"
                     }`}
                   >
@@ -105,7 +105,7 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
                     type="button"
                     onClick={() => toggle(endpoint)}
                     disabled={busyDomain === endpoint.domain}
-                    className="micro shrink-0 rounded-lg border border-border bg-white px-3 py-1.5 text-[0.625rem] uppercase text-cream-muted transition-colors hover:border-accent/60 hover:text-accent disabled:opacity-50"
+                    className="micro shrink-0 border border-border px-3 py-1.5 text-[0.625rem] uppercase text-cream-muted transition-colors hover:border-accent/60 hover:text-accent disabled:opacity-50"
                   >
                     {busyDomain === endpoint.domain ? "…" : endpoint.active ? "Pause" : "Resume"}
                   </button>

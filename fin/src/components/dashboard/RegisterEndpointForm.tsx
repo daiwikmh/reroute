@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   explainError,
   formatUnits,
@@ -9,7 +9,9 @@ import {
   type Explained,
   type SignFn,
 } from "@/utils/registry/client";
-import { CURRENCIES, type Currency } from "@/utils/registry/config";
+import { BACKEND_URL, CURRENCIES, type Currency } from "@/utils/registry/config";
+
+type PayoutCountry = { country: string; name: string; currency: string };
 
 type Props = {
   address: string | null;
@@ -34,7 +36,7 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
 }
 
 const inputClass =
-  "w-full rounded-lg border border-border bg-bg px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent-soft/60";
+  "w-full border border-border bg-bg px-3 py-2.5 text-sm text-ink outline-none transition-colors focus:border-accent";
 
 export default function RegisterEndpointForm({
   address,
@@ -49,8 +51,17 @@ export default function RegisterEndpointForm({
   const [price, setPrice] = useState("");
   const [accepted, setAccepted] = useState<Set<string>>(new Set());
   const [facilitatorUrl, setFacilitatorUrl] = useState(DEFAULT_FACILITATOR);
+  const [payoutCountries, setPayoutCountries] = useState<PayoutCountry[]>([]);
+  const [payoutCountry, setPayoutCountry] = useState("");
   const [pending, setPending] = useState(false);
   const [problem, setProblem] = useState<Explained | null>(null);
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/offramp/countries`)
+      .then((res) => res.json())
+      .then((body: PayoutCountry[]) => setPayoutCountries(body))
+      .catch(() => setPayoutCountries([]));
+  }, []);
 
   const acceptable = useMemo(
     () => CURRENCIES.filter((c) => c.reflectorTracked && c.code !== currency.code),
@@ -98,6 +109,11 @@ export default function RegisterEndpointForm({
         facilitatorUrl.trim() || DEFAULT_FACILITATOR,
         sign,
       );
+      await fetch(`${BACKEND_URL}/offramp/${encodeURIComponent(cleanDomain)}/config`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country: payoutCountry }),
+      }).catch(() => {});
       onRegistered(cleanDomain);
     } catch (err) {
       setProblem(explainError(err));
@@ -108,8 +124,8 @@ export default function RegisterEndpointForm({
 
   if (!isConnected) {
     return (
-      <div className="flex h-full flex-col justify-center rounded-2xl border border-border bg-surface p-8 shadow-sm">
-        <h2 className="text-2xl font-semibold leading-snug tracking-tight text-cream">
+      <div className="flex h-full flex-col justify-center border-t border-border bg-surface p-8">
+        <h2 className="hero-display text-2xl font-normal leading-snug tracking-tight text-cream">
           Connect your wallet to register a paid endpoint
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-cream-muted">
@@ -119,7 +135,7 @@ export default function RegisterEndpointForm({
         <button
           onClick={onConnect}
           disabled={isConnecting}
-          className="micro mt-6 self-start rounded-lg bg-accent px-5 py-3 text-xs uppercase text-white shadow-sm transition-colors hover:bg-accent/90 disabled:opacity-50"
+          className="micro mt-6 self-start bg-accent px-5 py-3 text-xs font-semibold uppercase text-black transition-colors hover:bg-white disabled:opacity-50"
         >
           {isConnecting ? "Connecting" : "Connect wallet"}
         </button>
@@ -128,8 +144,8 @@ export default function RegisterEndpointForm({
   }
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
-      <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+    <div className="flex h-full flex-col border-t border-border bg-surface p-6">
+      <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-accent">
         Register an endpoint
       </span>
 
@@ -174,7 +190,7 @@ export default function RegisterEndpointForm({
                   });
                 }}
                 title={c.name}
-                className={`micro rounded-md border px-2.5 py-1.5 text-[0.6875rem] uppercase transition-colors ${
+                className={`micro border px-2.5 py-1.5 text-[0.6875rem] uppercase transition-colors ${
                   currency.code === c.code
                     ? "border-accent bg-accent-soft/40 text-accent"
                     : "border-border text-cream-muted hover:border-cream-muted/60 hover:text-cream"
@@ -206,7 +222,7 @@ export default function RegisterEndpointForm({
                 key={c.code}
                 type="button"
                 onClick={() => toggleAccepted(c.code)}
-                className={`micro rounded-md border px-2.5 py-1.5 text-[0.6875rem] uppercase transition-colors ${
+                className={`micro border px-2.5 py-1.5 text-[0.6875rem] uppercase transition-colors ${
                   accepted.has(c.code)
                     ? "border-accent bg-accent-soft/40 text-accent"
                     : "border-border text-cream-muted hover:border-cream-muted/60 hover:text-cream"
@@ -218,6 +234,30 @@ export default function RegisterEndpointForm({
           </div>
         </div>
       )}
+
+      <div className="mt-4">
+        <Field label="Payout country" htmlFor="payoutCountry">
+          <select
+            id="payoutCountry"
+            value={payoutCountry}
+            onChange={(event) => setPayoutCountry(event.target.value)}
+            className={inputClass}
+          >
+            <option value="" disabled>
+              Select a country
+            </option>
+            {payoutCountries.map((c) => (
+              <option key={c.country} value={c.country}>
+                {c.name} ({c.currency})
+              </option>
+            ))}
+          </select>
+        </Field>
+        <p className="mt-1.5 text-[0.75rem] leading-relaxed text-cream-muted">
+          Where you'll cash out via MoneyGram — earnings convert to this currency at the
+          live exchange rate. Change it any time from Payouts.
+        </p>
+      </div>
 
       <div className="mt-4">
         <Field label="Facilitator URL" htmlFor="facilitator">
@@ -232,8 +272,8 @@ export default function RegisterEndpointForm({
 
       <button
         onClick={submit}
-        disabled={pending || !domain.trim() || !price.trim()}
-        className="micro mt-5 rounded-lg bg-accent px-4 py-2.5 text-xs uppercase text-white shadow-sm transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={pending || !domain.trim() || !price.trim() || !payoutCountry}
+        className="micro mt-5 bg-accent px-4 py-2.5 text-xs font-semibold uppercase text-black transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
       >
         {pending ? "Registering…" : "Register endpoint"}
       </button>

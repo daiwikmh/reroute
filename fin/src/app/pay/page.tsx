@@ -66,7 +66,7 @@ function PayDomain() {
           </Link>
           <Link
             href="/browse"
-            className="micro ml-auto border border-accent/60 px-4 py-2 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-ink"
+            className="micro ml-auto border border-accent/60 px-4 py-2 text-xs uppercase text-accent transition-colors hover:bg-accent hover:text-black"
           >
             Browse
           </Link>
@@ -110,7 +110,7 @@ function PayDomain() {
                 type="button"
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="micro w-full rounded-xl bg-accent px-4 py-3 text-xs uppercase text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="micro w-full bg-accent px-4 py-3 text-xs font-semibold uppercase text-black transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {isConnecting ? "Connecting…" : "Connect wallet"}
               </button>
@@ -123,7 +123,7 @@ function PayDomain() {
                   type="button"
                   onClick={pay}
                   disabled={paying || !quote?.ok}
-                  className="micro mt-3 w-full rounded-xl bg-accent px-4 py-3 text-xs uppercase text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="micro mt-3 w-full bg-accent px-4 py-3 text-xs font-semibold uppercase text-black transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {paying ? "Paying…" : "Pay and call"}
                 </button>

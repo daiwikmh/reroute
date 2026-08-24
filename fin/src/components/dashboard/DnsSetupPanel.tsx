@@ -35,13 +35,13 @@ function CopyField({ label, value }: { label: string; value: string }) {
     <div>
       <span className="micro block text-[0.6875rem] font-medium uppercase tracking-wide text-cream-muted">{label}</span>
       <div className="mt-1.5 flex items-stretch gap-1.5">
-        <code className="flex-1 truncate rounded-lg border border-border bg-bg px-3 py-2 text-[0.8125rem] text-cream">
+        <code className="flex-1 truncate border border-border bg-bg px-3 py-2 text-[0.8125rem] text-cream">
           {value}
         </code>
         <button
           type="button"
           onClick={copy}
-          className="micro shrink-0 rounded-lg border border-border px-3 text-[0.6875rem] uppercase text-cream-muted transition-colors hover:border-cream-muted/60 hover:text-cream"
+          className="micro shrink-0 border border-border px-3 text-[0.6875rem] uppercase text-cream-muted transition-colors hover:border-cream-muted/60 hover:text-cream"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -97,12 +97,12 @@ export default function DnsSetupPanel({ domain }: Props) {
   const copy = STATUS_COPY[status];
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
+    <div className="flex h-full flex-col border-t border-border bg-surface p-6">
       <div className="flex items-center justify-between gap-3">
-        <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+        <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-accent">
           Point your domain here
         </span>
-        <span className={`micro flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-[0.625rem] uppercase ${copy.text}`}>
+        <span className={`micro flex items-center gap-1.5 border border-border px-2.5 py-1 text-[0.625rem] uppercase ${copy.text}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${copy.dot}`} aria-hidden />
           {copy.label}
         </span>

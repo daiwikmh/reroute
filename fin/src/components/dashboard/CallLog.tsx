@@ -11,7 +11,27 @@ type CallRecord = {
   amount: string;
   txHash?: string;
   at: number;
+  country?: string;
+  agent?: string;
 };
+
+const regionNames =
+  typeof Intl !== "undefined" && "DisplayNames" in Intl ? new Intl.DisplayNames(["en"], { type: "region" }) : null;
+
+function countryLabel(code?: string) {
+  if (!code) return "Unknown";
+  if (code === "T1") return "Tor";
+  try {
+    return regionNames?.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+function agentLabel(agent?: string) {
+  if (!agent) return "Unknown";
+  return agent.length > 40 ? `${agent.slice(0, 40)}…` : agent;
+}
 
 const POLL_MS = 6000;
 
@@ -57,13 +77,13 @@ export default function CallLog({ domain }: { domain: string }) {
   }, 0);
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm">
+    <div className="flex h-full flex-col border-t border-border bg-surface p-6">
       <div className="flex items-center justify-between gap-3">
-        <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-cream-muted">
+        <span className="micro text-[0.6875rem] font-semibold uppercase tracking-wide text-accent">
           Verified access log
         </span>
         {calls && calls.length > 0 && (
-          <span className="micro rounded-full bg-accent-soft/40 px-2.5 py-1 text-[0.625rem] uppercase text-accent">
+          <span className="micro bg-accent-soft/40 px-2.5 py-1 text-[0.625rem] uppercase text-accent">
             {calls.length} verified request{calls.length === 1 ? "" : "s"}
             {total !== undefined && total > 0 && ` · ${total.toFixed(2)} collected`}
           </span>
@@ -85,11 +105,11 @@ export default function CallLog({ domain }: { domain: string }) {
       )}
 
       {calls && calls.length > 0 && (
-        <div className="mt-4 overflow-x-auto rounded-xl border border-border">
+        <div className="mt-4 overflow-x-auto border border-border">
           <table className="w-full min-w-[28rem] border-collapse">
             <thead>
               <tr className="border-b border-border bg-bg">
-                {["Payer", "Amount", "When", "Tx"].map((h) => (
+                {["Payer", "Amount", "Country", "Agent", "When", "Tx"].map((h) => (
                   <th
                     key={h}
                     className="micro px-3 py-2.5 text-left text-[0.625rem] font-medium uppercase tracking-wide text-cream-muted"
@@ -108,6 +128,10 @@ export default function CallLog({ domain }: { domain: string }) {
                     <td className="px-3 py-2.5 text-sm text-cream">
                       {currency ? formatUnits(BigInt(call.amount), currency.decimals) : call.amount}{" "}
                       {currency?.code ?? ""}
+                    </td>
+                    <td className="px-3 py-2.5 text-sm text-cream-muted">{countryLabel(call.country)}</td>
+                    <td className="px-3 py-2.5 text-sm text-cream-muted" title={call.agent}>
+                      {agentLabel(call.agent)}
                     </td>
                     <td className="px-3 py-2.5 text-sm text-cream-muted">
                       {new Date(call.at * 1000).toLocaleTimeString()}
