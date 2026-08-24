@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { Transaction, scValToNative } from "@stellar/stellar-sdk";
 import type { PaymentPayload } from "@x402/core/types";
-import { appendCall } from "../store.js";
+import { appendCall, getOffRampConfig } from "../store.js";
 import type { Bindings } from "../env.js";
 import { getEndpointByDomain, isPayerAllowed } from "../dns/registry.js";
 import { NETWORK_PASSPHRASE } from "../dns/config.js";
@@ -158,6 +158,8 @@ export async function handlePay(c: Context<{ Bindings: Bindings }>) {
     Object.entries(settlement.headers).forEach(([k, v]) => c.header(k, v));
     // Payment already cleared regardless of what the origin returned — that's
     // the payer's proof of a genuine attempt, not a reason to skip the log.
+    const cf = (c.req.raw as Request & { cf?: { country?: string } }).cf;
+    const offRamp = await getOffRampConfig(c.env.DNS_KV, domain);
     await appendCall(c.env.DNS_KV, {
       domain,
       payer: settlement.payer ?? "unknown",
@@ -165,6 +167,9 @@ export async function handlePay(c: Context<{ Bindings: Bindings }>) {
       amount: process.paymentRequirements.amount,
       txHash: settlement.transaction,
       at: Math.floor(Date.now() / 1000),
+      country: cf?.country,
+      agent: c.req.header("user-agent"),
+      offRampCountry: offRamp?.country,
     });
     c.header("Content-Type", origin.contentType);
     return c.body(origin.body, origin.status as never);

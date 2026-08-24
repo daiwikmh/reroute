@@ -9,6 +9,10 @@ export declare const networks: {
         readonly networkPassphrase: "Test SDF Network ; September 2015";
         readonly contractId: "CCLAFEUKE42FBXJATTADK4XNDUZNEGJERYWQWAI5INIGN3D63SB2RBC6";
     };
+    readonly mainnet: {
+        readonly networkPassphrase: "Public Global Stellar Network ; September 2015";
+        readonly contractId: "CALTXNYPEFU24UUSYJMHZCTE44ASRNXZ3FOHTIEDKWVQJSZFVZKMVG5D";
+    };
 };
 export type Asset = {
     tag: "Stellar";

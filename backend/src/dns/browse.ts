@@ -47,3 +47,31 @@ export async function listActiveEndpoints(kv: KVNamespace): Promise<BrowseEntry[
 
   return results.filter((entry): entry is BrowseEntry => entry !== null);
 }
+
+export type ResolvedDomain = BrowseEntry & { active: boolean; facilitator: string };
+
+// Live single-domain lookup for the public "resolve any domain" search box —
+// unlike listActiveEndpoints, this isn't limited to domains our own KV state
+// already knows about, and it reports inactive/registered domains too
+// instead of silently filtering them out.
+export async function resolveDomain(domain: string): Promise<ResolvedDomain | null> {
+  try {
+    const flat = await resolveTxtFlat(`_agent.${domain}`);
+    const raw = flat.find((r) => r.startsWith("v=aid1"));
+    if (!raw) return null;
+
+    const fields = parseTxtRecord(raw);
+    return {
+      domain,
+      active: fields.active === "true",
+      price: fields.price ?? "0",
+      cur: fields.cur ?? "UNKNOWN",
+      asset: fields.asset ?? "",
+      payto: fields.payto ?? "",
+      uri: fields.uri ?? "",
+      facilitator: fields.facilitator ?? "",
+    };
+  } catch {
+    return null;
+  }
+}

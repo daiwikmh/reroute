@@ -1,10 +1,12 @@
-export const RPC_URL = "https://soroban-testnet.stellar.org";
-export const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
+export const RPC_URL =
+  process.env.NEXT_PUBLIC_RPC_URL ?? "https://mainnet.sorobanrpc.com";
+export const NETWORK_PASSPHRASE =
+  process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ?? "Public Global Stellar Network ; September 2015";
 export const REGISTRY_CONTRACT_ID =
-  "CCLAFEUKE42FBXJATTADK4XNDUZNEGJERYWQWAI5INIGN3D63SB2RBC6";
+  process.env.NEXT_PUBLIC_REGISTRY_CONTRACT_ID ?? "CALTXNYPEFU24UUSYJMHZCTE44ASRNXZ3FOHTIEDKWVQJSZFVZKMVG5D";
 
 export const SIMULATION_SOURCE =
-  "GC6XYRAGBDI3LNX52D27S5S5JTMFAYESVBFL3JX6M7KAMNQACF5CI6ML";
+  process.env.NEXT_PUBLIC_SIMULATION_SOURCE ?? "GD4YDGESVMWKAXYO3SXWE7H45SHHZC66DE33KBJXI5VY6Q27NKVOTTNQ";
 
 // Where the backend's DNS-hosting API lives (record generation + live
 // CNAME/TXT verification for the setup panel).
@@ -23,15 +25,15 @@ export type Currency = {
   address: string;
   decimals: number;
   /** Whether Reflector can price this asset against another for automatic
-   * conversion. Confirmed false for everything here: Reflector's CEX/DEX
-   * aggregate feed only prices assets by symbol (Other("USDC")), never by
-   * Stellar contract address — a live lastprice({Stellar: <addr>}) call
-   * returns null for every asset below. The registry contract's get_price
-   * conversion path currently calls Reflector with Asset::Stellar(address),
-   * so it can never find a match — this needs a contract-level fix (map
-   * address -> Reflector symbol) before any "accepted asset" beyond the
-   * reference asset itself can actually settle. Until then, every endpoint
-   * effectively takes payment in its reference asset only. */
+   * conversion. Mainnet is initialized against Reflector's address-based
+   * Stellar-DEX oracle (CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M),
+   * which matches what the contract's get_price actually calls
+   * (Asset::Stellar(address)) — testnet was very likely pointed at the
+   * wrong (symbol-based) Reflector oracle, which is why conversion never
+   * worked there. Kept false here regardless: this specific oracle wiring
+   * has not yet been exercised with a real conversion call, so every
+   * endpoint should still be treated as reference-asset-only until that's
+   * verified live. */
   reflectorTracked: boolean;
 };
 
@@ -39,28 +41,14 @@ export const CURRENCIES: Currency[] = [
   {
     code: "USDC",
     name: "USD Coin",
-    address: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+    address: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
     decimals: 7,
     reflectorTracked: false,
   },
   {
     code: "XLM",
     name: "Stellar Lumens",
-    address: "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
-    decimals: 7,
-    reflectorTracked: false,
-  },
-  {
-    code: "cBRL",
-    name: "Brazilian Real (testnet demo)",
-    address: "CDXIABSD6U6T2AZYV3KGORQKYPXV3M3ZLQ7DBARZSNJLWAYUYT2QFTKO",
-    decimals: 7,
-    reflectorTracked: false,
-  },
-  {
-    code: "cNGN",
-    name: "Nigerian Naira (testnet demo)",
-    address: "CDABYX6VDPSQJEQXNTUEEWV6PRWR3PG43OQYC3ZKGRV52X576KLFPJWE",
+    address: "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA",
     decimals: 7,
     reflectorTracked: false,
   },

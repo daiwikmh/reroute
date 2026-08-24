@@ -40,6 +40,12 @@ export type CallRecord = {
   amount: string;
   txHash?: string;
   at: number; // unix seconds
+  country?: string; // ISO 3166-1 alpha-2 of the calling agent, from Cloudflare's cf object
+  agent?: string; // raw User-Agent header of the calling request
+  // Country of the local money-provider (e.g. MoneyGram) off-ramp a seller
+  // cashed out through — schema-ready, not populated until that off-ramp
+  // integration lands and starts writing it.
+  offRampCountry?: string;
 };
 
 // KV has no transactions — two settlements landing in the same instant could
@@ -58,4 +64,61 @@ export async function callsForDomain(kv: KVNamespace, domain: string): Promise<C
   const raw = await kv.get(CALLS_KEY);
   const all: CallRecord[] = raw ? JSON.parse(raw) : [];
   return all.filter((c) => c.domain === domain).sort((a, b) => b.at - a.at);
+}
+
+export type OffRampConfig = {
+  country: string;
+  currency: string;
+};
+
+export type OffRampReceipt = {
+  reference: string;
+  usdcAmount: string; // smallest units cashed out in this receipt
+  currency: string;
+  localAmount: number;
+  rate: number;
+  at: number; // unix seconds
+};
+
+const OFFRAMP_CONFIG_KEY = "offramp:config"; // domain -> OffRampConfig
+const OFFRAMP_WITHDRAWN_KEY = "offramp:withdrawn"; // domain -> cumulative smallest-units string
+const OFFRAMP_HISTORY_KEY = "offramp:history"; // domain -> OffRampReceipt[]
+
+export async function getOffRampConfig(kv: KVNamespace, domain: string): Promise<OffRampConfig | null> {
+  const raw = await kv.get(OFFRAMP_CONFIG_KEY);
+  const all: Record<string, OffRampConfig> = raw ? JSON.parse(raw) : {};
+  return all[domain] ?? null;
+}
+
+export async function setOffRampConfig(kv: KVNamespace, domain: string, config: OffRampConfig): Promise<void> {
+  const raw = await kv.get(OFFRAMP_CONFIG_KEY);
+  const all: Record<string, OffRampConfig> = raw ? JSON.parse(raw) : {};
+  all[domain] = config;
+  await kv.put(OFFRAMP_CONFIG_KEY, JSON.stringify(all));
+}
+
+export async function getWithdrawn(kv: KVNamespace, domain: string): Promise<bigint> {
+  const raw = await kv.get(OFFRAMP_WITHDRAWN_KEY);
+  const all: Record<string, string> = raw ? JSON.parse(raw) : {};
+  return BigInt(all[domain] ?? "0");
+}
+
+export async function addWithdrawn(kv: KVNamespace, domain: string, amount: bigint): Promise<void> {
+  const raw = await kv.get(OFFRAMP_WITHDRAWN_KEY);
+  const all: Record<string, string> = raw ? JSON.parse(raw) : {};
+  all[domain] = ((BigInt(all[domain] ?? "0")) + amount).toString();
+  await kv.put(OFFRAMP_WITHDRAWN_KEY, JSON.stringify(all));
+}
+
+export async function getOffRampHistory(kv: KVNamespace, domain: string): Promise<OffRampReceipt[]> {
+  const raw = await kv.get(OFFRAMP_HISTORY_KEY);
+  const all: Record<string, OffRampReceipt[]> = raw ? JSON.parse(raw) : {};
+  return (all[domain] ?? []).sort((a, b) => b.at - a.at);
+}
+
+export async function appendOffRampReceipt(kv: KVNamespace, domain: string, receipt: OffRampReceipt): Promise<void> {
+  const raw = await kv.get(OFFRAMP_HISTORY_KEY);
+  const all: Record<string, OffRampReceipt[]> = raw ? JSON.parse(raw) : {};
+  all[domain] = [...(all[domain] ?? []), receipt];
+  await kv.put(OFFRAMP_HISTORY_KEY, JSON.stringify(all));
 }
