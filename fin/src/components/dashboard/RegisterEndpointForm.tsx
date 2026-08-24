@@ -270,6 +270,16 @@ export default function RegisterEndpointForm({
         </Field>
       </div>
 
+      {address && (
+        <p className="mt-5 border border-border bg-bg px-4 py-3 text-[0.75rem] text-cream-muted">
+          Payments go straight to your connected wallet,{" "}
+          <span className="text-cream" title={address}>
+            {`${address.slice(0, 4)}…${address.slice(-4)}`}
+          </span>
+          . Reroute never holds your funds.
+        </p>
+      )}
+
       <button
         onClick={submit}
         disabled={pending || !domain.trim() || !price.trim() || !payoutCountry}

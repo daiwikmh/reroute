@@ -3,7 +3,8 @@ import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import type { ClientStellarSigner } from "@x402/stellar";
 import { NETWORK_PASSPHRASE } from "@/utils/registry/config";
 
-const STELLAR_NETWORK = "stellar:pubnet";
+const STELLAR_NETWORK = (process.env.NEXT_PUBLIC_X402_NETWORK ??
+  "stellar:pubnet") as `${string}:${string}`;
 
 export type AuthEntrySigner = (authEntry: string, networkPassphrase: string) => Promise<string>;
 

@@ -8,6 +8,10 @@ import type { Network } from "@x402/core/types";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import { createEd25519Signer } from "@x402/stellar";
 
+// Without this the seller's dashboard logs every agent call as "Unknown" —
+// Node's fetch sends no User-Agent of its own.
+const AGENT_NAME = process.env.REROUTE_AGENT_NAME ?? "reroute-mcp";
+
 function asNetwork(value: string): Network {
   if (!value.includes(":")) throw new Error(`"${value}" isn't a valid CAIP-2 network id (expected "namespace:reference").`);
   return value as Network;
@@ -38,14 +42,14 @@ export async function payAndCall(
   client.setSpendControls(false);
   const http = new x402HTTPClient(client);
 
-  const first = await fetch(url);
+  const first = await fetch(url, { headers: { "user-agent": AGENT_NAME } });
   if (first.status !== 402) {
     return { status: first.status, paymentStatus: "none", body: await first.json().catch(() => null) };
   }
 
   const paymentRequired = http.getPaymentRequiredResponse((name) => first.headers.get(name));
   const paymentPayload = await http.createPaymentPayload(paymentRequired);
-  const headers = http.encodePaymentSignatureHeader(paymentPayload);
+  const headers = { ...http.encodePaymentSignatureHeader(paymentPayload), "user-agent": AGENT_NAME };
 
   const second = await fetch(url, { headers });
   const result = await http.processResponse(second);

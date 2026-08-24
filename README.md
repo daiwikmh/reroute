@@ -26,10 +26,9 @@ Every site that publishes content or exposes an API now has a second audience it
 Reroute turns that cost back into revenue. Register a domain once, and Reroute publishes an [AID](https://aid.agentcommunity.org/)-style `_agent.<domain>` TXT record carrying your price, currency, settlement asset, and payout address. Any agent — Claude, GPT, a custom crawler — resolves the exact terms of accessing your content in a single DNS lookup, before it ever sends a request:
 
 ```
-$ dig +short TXT 96bc5082e32eb01d.agents.neurus.xyz
-"v=aid1;uri=https://neurus.xyz/pay/m3-test.neurus.xyz;proto=mcp;p=stellar-x402;
-price=300000;cur=USDC;asset=CBIE...QDAMA;payto=GDI6...SFCT7;
-facilitator=https://channels.openzeppelin.com/x402/testnet;active=true"
+v=aid1;uri=<endpoint>;proto=mcp;p=stellar-x402;
+price=<amount>;cur=<currency>;asset=<contract>;payto=<address>;
+facilitator=<url>;active=true
 ```
 
 If the agent decides to proceed, it pays through the standard [x402](https://developers.stellar.org/docs/build/agentic-payments/x402) protocol on Stellar — an on-chain, per-request micropayment that settles in seconds. No API keys to issue, no invoices to chase, no chargebacks. The moment payment clears, Reroute's proxy fetches your real site and returns your real response — the agent never touches your origin unpaid.
@@ -65,30 +64,50 @@ The effect: a site under heavy agent load doesn't have to choose between blockin
 
 ```mermaid
 graph TD
-  Agent["Agent / crawler<br/>Claude, GPT, custom"] -->|"1. dig TXT _agent.domain"| DNS[("Cloudflare DNS<br/>agents.&lt;zone&gt;")]
-  Agent -->|"2. GET /pay/:domain<br/>+ X-PAYMENT header"| Proxy["Reroute Backend<br/>(Cloudflare Worker)"]
+  Agent["Agent / crawler<br/>Claude, GPT, custom"] -->|"1. resolve TXT _agent.domain"| DNS[("Cloudflare DNS<br/>agents.&lt;zone&gt;")]
+  Agent -->|"2. GET /pay/:domain<br/>+ X-PAYMENT header"| Proxy["Reroute Backend<br/>Cloudflare Worker"]
 
-  Proxy -->|"verify + settle"| Facilitator["Stellar x402 Facilitator<br/>(hosted, not ours)"]
-  Proxy -->|"3. fetch real response"| Origin["Seller's origin<br/>https://domain"]
+  Proxy -->|"3. verify + settle"| Facilitator["Stellar x402 Facilitator<br/>hosted, stellar:pubnet"]
+  Proxy -->|"price conversion"| Oracle["Reflector Oracle<br/>Stellar-DEX feed"]
+  Proxy -->|"4. fetch real response"| Origin["Seller's origin<br/>https://domain"]
   Proxy --> KV[("Workers KV<br/>calls · DNS state · payouts")]
 
-  Owner["Endpoint owner"] -->|"register() / setActive()"| Registry["endpoint_registry<br/>(Soroban contract)"]
-  Registry -->|"contract events"| Sync["DNS sync job<br/>(Cron Trigger, 1/min)"]
+  Owner["Endpoint owner"] -->|"register() / setActive()"| Registry["endpoint_registry<br/>Soroban contract, mainnet"]
+  Registry -->|"contract events"| Sync["DNS sync job<br/>Cron Trigger, 1/min"]
   Sync -->|"publish TXT record"| DNS
 
   Proxy -->|"live FX rate"| MoneyGram["MoneyGram cash-out<br/>local currency payout"]
-  Dashboard["fin/ dashboard<br/>(Next.js, Cloudflare)"] -->|"reads/writes"| Registry
+  Dashboard["fin/ dashboard<br/>Next.js, Cloudflare"] -->|"reads/writes"| Registry
   Dashboard -->|"reads"| Proxy
 ```
 
 | Piece | Role |
 |---|---|
-| `endpoint_registry` (Soroban) | On-chain source of truth for price, accepted assets, payout address, payer policy. |
-| DNS sync job | Watches registry events, publishes the `_agent.<domain>` TXT record via Cloudflare. |
-| `/pay/:domain` proxy | The x402 payment gate — verifies, settles, then fetches and returns the seller's real origin. |
+| `endpoint_registry` (Soroban) | On-chain source of truth for price, accepted assets, payout address, payer policy — see [Mainnet Deployment](#mainnet-deployment). |
+| Reflector oracle | Address-based Stellar-DEX price feed the registry calls to convert an endpoint's reference price into its accepted assets. |
+| DNS sync job | Watches registry events, publishes the `_agent.<domain>` TXT record via Cloudflare — the DNS record is a cache of on-chain state, never the source of truth. |
+| `/pay/:domain` proxy | The x402 payment gate — verifies, settles against the facilitator, then fetches and returns the seller's real origin. |
 | MoneyGram cash-out | Converts an endpoint's collected USDC into the owner's local currency at a live rate, on demand. |
 | `mcp-server/` | Gives Claude (or any MCP client) real tools to resolve and pay Reroute endpoints from a conversation. |
 | `fin/` dashboard | Registration, DNS setup, live call log, analytics, payouts, and a public no-wallet Browse + resolve page. |
+
+---
+
+## Mainnet Deployment
+
+Reroute's contracts and payment path moved to Stellar mainnet on **2026-08-24**.
+
+| Component | Value |
+|---|---|
+| `endpoint_registry` contract | `CALTXNYPEFU24UUSYJMHZCTE44ASRNXZ3FOHTIEDKWVQJSZFVZKMVG5D` |
+| Admin / deployer | `GD4YDGESVMWKAXYO3SXWE7H45SHHZC66DE33KBJXI5VY6Q27NKVOTTNQ` — scoped to `admin_deactivate` only; there is no rotation function, so this address is permanent. |
+| Reflector oracle | `CALI2BYU2JE6WVRUFYTS6MSBNEHGJ35P4AVCZYF3B6QOE3QKOB2PLE6M` |
+| x402 network id | `stellar:pubnet` |
+| x402 facilitator | `https://channels.openzeppelin.com/x402` |
+| USDC (SAC) | `CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75` |
+| XLM (SAC) | `CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EVH34XOWMA` |
+
+**Status:** infrastructure is live — the registry, oracle wiring, and facilitator are deployed and reachable on mainnet. No payment has settled there yet, so end-to-end settlement is verified on testnet only (below); treat mainnet as deployed, not yet exercised.
 
 ---
 
@@ -121,7 +140,7 @@ The DNS record's `proto=mcp` field is backed by a real tool, not just a claim: `
 
 ---
 
-## Verified, on real Stellar testnet
+## Verified end-to-end (Stellar testnet)
 
 - On-chain registration and the resulting `402` response carry the exact price/asset/payTo the registry contract holds, confirmed by driving a real request through the deployed contract.
 - A real signed payment from a funded testnet wallet, verified and settled through Stellar's hosted facilitator, in real Circle testnet USDC — confirmed independently against Horizon.
@@ -131,34 +150,6 @@ The DNS record's `proto=mcp` field is backed by a real tool, not just a claim: `
 - The backend runs as a deployed Cloudflare Worker (`reroute-backend`, reachable at `api.neurus.xyz`) with state in Workers KV and DNS sync on a real Cron Trigger — not a local process kept alive for a demo.
 
 **Still open:** the registry's `accepted_assets` field exists on chain but isn't read by the 402 quote yet — every endpoint currently prices in its single `reference_asset` only. See `ROADMAP.md`.
-
----
-
-## Layout
-
-| Path | Contents |
-|---|---|
-| `fin/` | Next.js 16 frontend on Cloudflare (`reroute-fin`) — landing page, the dashboard, a wallet-connected `/pay` page, and the public `/browse` + resolve page. |
-| `contracts/contracts/endpoint_registry/` | Soroban contract: registration, pricing, accepted assets, payer policy. |
-| `contracts/packages/endpoint_registry_sdk/` | Generated TypeScript bindings. |
-| `backend/` | Cloudflare Worker (`reroute-backend`) — DNS sync, the x402-gated proxy, the call log, MoneyGram cash-out. |
-| `mcp-server/` | MCP server so Claude (or any MCP-speaking agent) can resolve prices and pay Reroute endpoints from a conversation. |
-| `REROUTE_RESEARCH.md` | External research (protocols, standards, economics) behind Reroute's design decisions. |
-| `ROADMAP.md` | The milestones to mainnet — what's done, what's open, what's not started. |
-
----
-
-## Develop
-
-```bash
-cd contracts && cargo test -p endpoint-registry
-cd backend && npm install && npm run dev     # wrangler dev
-cd fin && npm install && npm run dev
-```
-
-Deploying the backend for real: `cd backend && npm run deploy` (needs `wrangler login` once, plus `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`, and `X402_FACILITATOR_API_KEY` set via `wrangler secret bulk`).
-
-Deploying the frontend for real: `cd fin && npm run build && npx wrangler deploy` (static export, served from Cloudflare's edge as `reroute-fin`).
 
 ---
 

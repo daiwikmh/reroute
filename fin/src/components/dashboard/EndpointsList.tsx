@@ -18,6 +18,10 @@ type Props = {
   onSelectDomain: (domain: string) => void;
 };
 
+function shortAddress(address: string) {
+  return `${address.slice(0, 4)}…${address.slice(-4)}`;
+}
+
 function currencyFor(address: string) {
   return CURRENCIES.find((c) => c.address === address);
 }
@@ -89,6 +93,9 @@ export default function EndpointsList({ owner, sign, refreshKey, onSelectDomain 
                   <p className="mt-0.5 text-[0.75rem] text-cream-muted">
                     {currency ? formatUnits(endpoint.referencePrice, currency.decimals) : endpoint.referencePrice.toString()}{" "}
                     {currency?.code ?? ""} per call
+                  </p>
+                  <p className="mt-0.5 text-[0.75rem] text-cream-muted" title={endpoint.payTo}>
+                    Paid to <span className="text-cream">{shortAddress(endpoint.payTo)}</span>
                   </p>
                 </div>
 

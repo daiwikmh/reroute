@@ -9,7 +9,7 @@
     "types": "wrangler types"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "^14.5.0",
+    "@stellar/stellar-sdk": "^16.2.0",
     "@x402/core": "^2.23.0",
     "@x402/stellar": "^2.23.0",
     "endpoint_registry_sdk": "file:../contracts/packages/endpoint_registry_sdk",

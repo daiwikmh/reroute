@@ -7,8 +7,13 @@
   "observability": {
     "enabled": true
   },
+  // preview_id keeps `wrangler dev` off the production namespace.
   "kv_namespaces": [
-    { "binding": "DNS_KV", "id": "e81a520924f746d7888a1b2b7bc3f934" }
+    {
+      "binding": "DNS_KV",
+      "id": "e81a520924f746d7888a1b2b7bc3f934",
+      "preview_id": "001d755250cd4dbd90b5eac3bf325814"
+    }
   ],
   "triggers": {
     // Every minute — the finest granularity Cron Triggers support, replacing
